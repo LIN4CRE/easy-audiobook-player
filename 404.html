@@ -111,10 +111,33 @@
           <button id="nextBtn" class="button" type="button">Next</button>
         </div>
         <div class="progress-box">
-          <div id="progressText">Progress is saved automatically.</div>
-          <div class="speed-control">
-            <label for="speedSelect">Speed</label>
-            <select id="speedSelect"><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="1.75">1.75×</option><option value="2">2×</option></select>
+          <div>
+            <div id="progressText">Progress is saved automatically.</div>
+            <span id="sleepBadge" class="sleep-badge hidden" title="Sleep timer active">⏳ <span id="sleepTimerDisplay"></span></span>
+          </div>
+          <div class="controls-row">
+            <div class="speed-control">
+              <label for="speedSelect">Speed</label>
+              <select id="speedSelect">
+                <option value="0.75">0.75×</option>
+                <option value="1" selected>1×</option>
+                <option value="1.25">1.25×</option>
+                <option value="1.5">1.5×</option>
+                <option value="1.75">1.75×</option>
+                <option value="2">2×</option>
+              </select>
+            </div>
+            <div class="sleep-control">
+              <label for="sleepSelect">Sleep Timer</label>
+              <select id="sleepSelect">
+                <option value="0" selected>Off</option>
+                <option value="15">15 min</option>
+                <option value="30">30 min</option>
+                <option value="45">45 min</option>
+                <option value="60">60 min</option>
+                <option value="chapter">End of Chapter</option>
+              </select>
+            </div>
           </div>
         </div>
         <section>
@@ -124,6 +147,12 @@
           </div>
           <div id="chapterList" class="chapter-list"></div>
         </section>
+        <div class="hotkey-hints">
+            <span><strong>Space</strong>: Play/Pause</span>
+            <span><strong>← / →</strong>: ±15s</span>
+            <span><strong>[ / ]</strong>: Chapters</span>
+            <span><strong>M</strong>: Mute</span>
+          </div>
       </main>
     </div>
   </div>

@@ -7,12 +7,24 @@
 
   const sampleBooks = [
     {
-      title: 'Sample Audio Book',
-      author: 'Replace or delete this',
-      source: 'Demo links',
+      title: 'The Adventures of Sherlock Holmes',
+      author: 'Sir Arthur Conan Doyle',
+      source: 'LibriVox / Public Domain',
       chapters: [
-        { title: 'Demo Chapter 1', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
-        { title: 'Demo Chapter 2', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' }
+        { title: '01 - A Scandal in Bohemia', url: 'https://archive.org/download/adventures_sherlock_holmes_1303_librivox/adventuresofsherlockholmes_01_doyle_64kb.mp3' },
+        { title: '02 - The Red-Headed League', url: 'https://archive.org/download/adventures_sherlock_holmes_1303_librivox/adventuresofsherlockholmes_02_doyle_64kb.mp3' },
+        { title: '03 - A Case of Identity', url: 'https://archive.org/download/adventures_sherlock_holmes_1303_librivox/adventuresofsherlockholmes_03_doyle_64kb.mp3' },
+        { title: '04 - The Boscombe Valley Mystery', url: 'https://archive.org/download/adventures_sherlock_holmes_1303_librivox/adventuresofsherlockholmes_04_doyle_64kb.mp3' }
+      ]
+    },
+    {
+      title: 'Alice\'s Adventures in Wonderland',
+      author: 'Lewis Carroll',
+      source: 'LibriVox / Public Domain',
+      chapters: [
+        { title: '01 - Down the Rabbit Hole', url: 'https://archive.org/download/alices_adventures_under_ground_1009_librivox/alicesadventuresunderground_01_carroll_64kb.mp3' },
+        { title: '02 - The Pool of Tears', url: 'https://archive.org/download/alices_adventures_under_ground_1009_librivox/alicesadventuresunderground_02_carroll_64kb.mp3' },
+        { title: '03 - A Caucus-Race and a Long Tale', url: 'https://archive.org/download/alices_adventures_under_ground_1009_librivox/alicesadventuresunderground_03_carroll_64kb.mp3' }
       ]
     }
   ];
@@ -29,7 +41,7 @@
     copyJson: $('copyJson'), resetAll: $('resetAll'), loadJson: $('loadJson'), bookMeta: $('bookMeta'),
     bookTitle: $('bookTitle'), chapterTitle: $('chapterTitle'), player: $('player'), prevBtn: $('prevBtn'),
     backBtn: $('backBtn'), playBtn: $('playBtn'), fwdBtn: $('fwdBtn'), nextBtn: $('nextBtn'),
-    progressText: $('progressText'), speedSelect: $('speedSelect'), chapterFilter: $('chapterFilter'),
+    progressText: $('progressText'), speedSelect: $('speedSelect'), sleepSelect: $('sleepSelect'), sleepBadge: $('sleepBadge'), sleepTimerDisplay: $('sleepTimerDisplay'), chapterFilter: $('chapterFilter'),
     chapterList: $('chapterList'), emptyTemplate: $('emptyTemplate'), themeToggle: $('themeToggle')
   };
 
@@ -232,4 +244,114 @@
   document.documentElement.dataset.theme = state.theme || 'dark';
   dom.speedSelect.value = String(state.speed || 1); dom.player.playbackRate = Number(dom.speedSelect.value) || 1;
   save(); render(); if (books.length) loadChapter(currentChapter, false);
+
+  // Sleep Timer & Cover Animation
+  let sleepTimerId = null;
+  let sleepEndsAt = null;
+
+  function updateSleepDisplay() {
+    if (!sleepEndsAt) {
+      dom.sleepBadge.classList.add('hidden');
+      return;
+    }
+    const rem = Math.max(0, Math.ceil((sleepEndsAt - Date.now()) / 1000));
+    if (rem <= 0) {
+      fadeAndPause();
+      cancelSleepTimer();
+      return;
+    }
+    dom.sleepBadge.classList.remove('hidden');
+    const m = Math.floor(rem / 60);
+    const s = rem % 60;
+    dom.sleepTimerDisplay.textContent = `${m}:${String(s).padStart(2, '0')}`;
+  }
+
+  function fadeAndPause() {
+    let vol = dom.player.volume;
+    const fadeInterval = setInterval(() => {
+      vol = Math.max(0, vol - 0.2);
+      dom.player.volume = vol;
+      if (vol <= 0.05) {
+        clearInterval(fadeInterval);
+        dom.player.pause();
+        dom.player.volume = 1;
+        showStatus('Sleep timer completed. Playback paused.', 'ok');
+      }
+    }, 200);
+  }
+
+  function setSleepTimer(minutes) {
+    if (sleepTimerId) {
+      clearInterval(sleepTimerId);
+      sleepTimerId = null;
+    }
+    if (minutes === 'chapter') {
+      sleepEndsAt = 'chapter';
+      dom.sleepBadge.classList.remove('hidden');
+      dom.sleepTimerDisplay.textContent = 'End of chapter';
+      return;
+    }
+    const mins = Number(minutes) || 0;
+    if (mins <= 0) {
+      sleepEndsAt = null;
+      dom.sleepBadge.classList.add('hidden');
+      return;
+    }
+    sleepEndsAt = Date.now() + mins * 60 * 1000;
+    updateSleepDisplay();
+    sleepTimerId = setInterval(updateSleepDisplay, 1000);
+  }
+
+  function cancelSleepTimer() {
+    if (sleepTimerId) clearInterval(sleepTimerId);
+    sleepTimerId = null;
+    sleepEndsAt = null;
+    dom.sleepBadge.classList.add('hidden');
+    dom.sleepSelect.value = '0';
+  }
+
+  dom.sleepSelect.addEventListener('change', () => {
+    setSleepTimer(dom.sleepSelect.value);
+  });
+
+  dom.player.addEventListener('play', () => {
+    dom.coverBox.classList.add('playing');
+  });
+
+  dom.player.addEventListener('pause', () => {
+    dom.coverBox.classList.remove('playing');
+  });
+
+  dom.player.addEventListener('ended', () => {
+    if (sleepEndsAt === 'chapter') {
+      cancelSleepTimer();
+      dom.player.pause();
+      showStatus('End of chapter reached. Sleep timer paused playback.', 'ok');
+      return;
+    }
+  });
+
+  // Global Keyboard Shortcuts
+  window.addEventListener('keydown', (e) => {
+    const tag = e.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+    if (e.code === 'Space' || e.key === 'k') {
+      e.preventDefault();
+      dom.player.paused ? dom.player.play() : dom.player.pause();
+    } else if (e.code === 'ArrowLeft' || e.key === 'j') {
+      e.preventDefault();
+      dom.player.currentTime = Math.max(0, dom.player.currentTime - 15);
+    } else if (e.code === 'ArrowRight' || e.key === 'l') {
+      e.preventDefault();
+      dom.player.currentTime = Math.min(dom.player.duration || 0, dom.player.currentTime + 15);
+    } else if (e.code === 'BracketLeft') {
+      dom.prevBtn.click();
+    } else if (e.code === 'BracketRight') {
+      dom.nextBtn.click();
+    } else if (e.key === 'm' || e.key === 'M') {
+      dom.player.muted = !dom.player.muted;
+    }
+  });
+
 })();

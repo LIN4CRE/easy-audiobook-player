@@ -1,8 +1,12 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="Easy Audiobook Player banner" width="100%" />
+  <img src="assets/banner.jpg" alt="Easy Audiobook Player banner" width="100%" />
 </p>
 
 # Easy Audiobook Player
+
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Try_Online-f5b84b?style=for-the-badge&logo=githubpages&logoColor=black)](https://lin4cre.github.io/easy-audiobook-player/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-ffd166?style=for-the-badge)](LICENSE)
+[![Vanilla HTML5](https://img.shields.io/badge/HTML5-Zero_Dependencies-E34F26?style=for-the-badge&logo=html5&logoColor=white)](index.html)
 
 A polished, static **HTML5 audiobook library/player** you can host on GitHub Pages, Netlify, your own server, or open directly in a browser.
 
@@ -25,7 +29,10 @@ It lets you add books from:
 - Previous/next chapter and auto-play next chapter
 - Skip back/forward 15 seconds
 - Saves listening position per chapter
-- Playback speed selector
+- Playback speed selector (0.75× to 2×)
+- **Sleep timer with auto-pause and volume fade-out** (15m, 30m, 45m, 60m, end of chapter)
+- **Keyboard shortcuts**: Space (Play/Pause), `←`/`→` (±15s), `[`/`]` (Chapters), `M` (Mute)
+- **Preloaded classics**: Instant-play public domain books (Sherlock Holmes, Alice in Wonderland)
 - Dark/light theme toggle
 - Export, copy, import, and restore library JSON
 - Works as a static site: no database, no build step
